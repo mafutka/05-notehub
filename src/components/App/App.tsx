@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { fetchNotes } from '../../services/noteService';
@@ -16,7 +17,7 @@ export default function App() {
     queryFn: () => fetchNotes(page, 12, searchTerm),
     placeholderData: keepPreviousData,
   });
-
+console.log(data);
   return (
     <>
       <header className={css.header}>
@@ -28,6 +29,7 @@ export default function App() {
       {isError && <p>Something went wrong</p>}
 
       {data && data.results.length > 0 && (
+        
         <>
           <NoteList notes={data.results} />
           {data.total > 12 && (
@@ -42,3 +44,4 @@ export default function App() {
     </>
   );
 }
+

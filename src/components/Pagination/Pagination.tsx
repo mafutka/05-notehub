@@ -1,9 +1,8 @@
 import ReactPaginate from 'react-paginate'
-import css from './Psginstion.module.css'
+import css from './Paginstion.module.css'
 
 interface PaginateProps {
   totalPages: number,
-  pageCount: number;
   currentPage: number;
   onPageChange: (selected: number) => void;
 }
