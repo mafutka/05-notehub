@@ -1,18 +1,26 @@
-// Додайте в хедер застосунку компонент SearchBox. 
-// Він має створювати DOM-елемент наступної структури:
+import { useState, useEffect } from 'react';
+import { useDebounce } from 'use-debounce';
+import css from './SearchBox.module.css';
 
-<input
-	className={css.input}
-  type="text"
-  placeholder="Search notes"
- />
+interface SearchBoxProps {
+  onSearch: (value: string) => void;
+}
 
-//  Користувач може шукати нотатки за допомогою текстового поля, 
-// при зміні значення якого на бекенд відправляється запит для отримання нотатків, 
-// які підходять під пошук. Для цього до запиту потрібно додати параметр search 
-// із текстовим значенням для пошуку:
+export default function SearchBox({ onSearch }: SearchBoxProps) {
+  const [input, setInput] = useState('');
+  const [debouncedValue] = useDebounce(input, 500);
 
-// GET https://notehub-public.goit.study/api/notes?search=mysearchtext
+  useEffect(() => {
+    onSearch(debouncedValue.trim());
+  }, [debouncedValue, onSearch]);
 
-// Обов’язково зробіть відкладений пошук з use-debounce, 
-// щоб не виконувати запит на кожний введений символ.
+  return (
+    <input
+      className={css.input}
+      type="text"
+      placeholder="Search notes"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+    />
+  );
+}

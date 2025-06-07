@@ -1,33 +1,44 @@
-import { useState } from 'react'
-import css from './App.module.css'
+import { useState } from 'react';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
+import { fetchNotes } from '../../services/noteService';
+import SearchBox from '../SearchBox/SearchBox';
+import NoteList from '../NoteList/NoteList';
+import Pagination from '../Pagination/Pagination';
+import type { FetchNotesResponse } from '../../services/noteService'
+import css from './App.module.css';
 
 export default function App() {
-  const [] = useState(0)
+  const [page, setPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const { data, isLoading, isError } = useQuery<FetchNotesResponse>({
+    queryKey: ['notes', page, searchTerm],
+    queryFn: () => fetchNotes(page, 12, searchTerm),
+    placeholderData: keepPreviousData,
+  });
 
   return (
-  <div className={css.app}>
-	<header className={css.toolbar}>
-		{/* Компонент SearchBox */}
-		{/* Пагінація */}
-		{  <button className={css.button}>Create note +</button>
-/* Кнопка створення нотатки 
-При натисканні на цю кнопку має відкриватись модальне вікно NoteModal з формою NoteForm. 
-Компонент NoteModal має створювати DOM-елемент наступної структури:*/}
-  </header>
-</div>
-  )
+    <>
+      <header className={css.header}>
+        <SearchBox onSearch={setSearchTerm} />
+        {/* кнопку створення нотатки */}
+      </header>
+
+      {isLoading && <p>Loading...</p>}
+      {isError && <p>Something went wrong</p>}
+
+      {data && data.results.length > 0 && (
+        <>
+          <NoteList notes={data.results} />
+          {data.total > 12 && (
+            <Pagination
+            totalPages={Math.ceil(data.total / data.limit)}
+            currentPage={page}
+            onPageChange={setPage}
+/>
+          )}
+        </>
+      )}
+    </>
+  );
 }
-
-// Компонент App є контейнером для решти компонентів і поки що створює таку розмітку:
-
-
-// В майбутному в хедері буде додаткова розмітка елементів пошуку, 
-// пагінації та відкриття модального вікна для створення нотатки.
-
-// Додатково
-
-
-
-// Рекомендуємо створити окремі компоненти для відображення 
-// індикатора завантаження під час виконання HTTP-запитів, 
-// повідомлень про помилки та інших статусів запиту.

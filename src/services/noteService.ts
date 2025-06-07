@@ -1,4 +1,59 @@
 import axios from "axios";
+import type { Note } from '../types/note';
+
+export interface FetchNotesResponse {
+  results: Note[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+const myToken = import.meta.env.VITE_NOTEHUB_TOKEN;
+
+const api = axios.create({
+    baseURL: 'https://notehub-public.goit.study/api',
+    headers: {
+    Authorization: `Bearer ${myToken}`,
+  },
+});
+
+interface FetchNotesResponse {
+  results: Note[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export const fetchNotes = async (
+  page = 1,
+  perPage = 12,
+  search = ''
+): Promise<FetchNotesResponse> => {
+  const response = await api.get<FetchNotesResponse>('/notes', {
+    params: {
+      page,
+      perPage,
+      search,
+    },
+  });
+  return response.data;
+};
+
+export const createNote = async (
+  content: string
+): Promise<Note> => {
+  const response = await api.post<Note>('/notes', { content });
+  return response.data;
+};
+
+export const deleteNote = async (
+  id: number
+): Promise<Note> => {
+  const response = await api.delete<Note>(`/notes/${id}`);
+  return response.data;
+};
+
+
 
 // Для роботи з колекцією нотатків використовуйте готовий бекенд. 
 // Документація до нього доступна за посиланням:
