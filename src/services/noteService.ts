@@ -1,18 +1,13 @@
 import axios from "axios";
 import type { Note } from "../types/note";
 
-// Тип відповіді на запит нотаток
 export interface FetchNotesResponse {
-  results: Note[];
-  total: number;
-  page: number;
-  limit: number;
+  notes: Note[];
+  totalPages: number;
 }
 
-// Токен з .env (важливо: VITE_ префікс для Vite)
 const myToken = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-// Axios-інстанс із заголовками
 const api = axios.create({
   baseURL: "https://notehub-public.goit.study/api",
   headers: {
@@ -20,13 +15,11 @@ const api = axios.create({
   },
 });
 
-// Отримання нотаток з підтримкою пагінації та пошуку
 export const fetchNotes = async (
   page = 1,
   perPage = 12,
   search = ""
 ): Promise<FetchNotesResponse> => {
-  // Формуємо параметри динамічно — без порожнього search
   const params: Record<string, string | number> = {
     page,
     perPage,
@@ -36,23 +29,20 @@ export const fetchNotes = async (
     params.search = search.trim();
   }
 
-  // DEBUG (можна прибрати після налагодження)
-  console.log("➡️ fetchNotes params:", params);
-
-  const response = await api.get<FetchNotesResponse>("/notes", {
-    params,
-  });
+  const response = await api.get("/notes", { params });
 
   return response.data;
 };
 
-// Створення нової нотатки
-export const createNote = async (content: string): Promise<Note> => {
-  const response = await api.post<Note>("/notes", { content });
+export const createNote = async (note: {
+  title: string;
+  content: string;
+  tag: string;
+}): Promise<Note> => {
+  const response = await api.post<Note>('/notes', note);
   return response.data;
 };
 
-// Видалення нотатки
 export const deleteNote = async (id: number): Promise<Note> => {
   const response = await api.delete<Note>(`/notes/${id}`);
   return response.data;
