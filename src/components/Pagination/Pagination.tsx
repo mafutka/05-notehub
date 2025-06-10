@@ -1,13 +1,13 @@
 import ReactPaginate from 'react-paginate'
-import css from './Paginstion.module.css'
+import css from './Pagination.module.css'
 
-interface PaginateProps {
+interface PaginationProps {
   totalPages: number,
   currentPage: number;
   onPageChange: (selected: number) => void;
 }
 
-export default function Pagination({ totalPages, currentPage, onPageChange }: PaginateProps) {
+export default function Pagination({ totalPages, currentPage, onPageChange }: PaginationProps) {
     return (
         <ReactPaginate
       pageCount={totalPages}
@@ -23,16 +23,12 @@ export default function Pagination({ totalPages, currentPage, onPageChange }: Pa
     )
 }
 
-// Бекенд завжди повертає пагіновану колекцію нотатків. 
-// Тому потрібно додати до компонента App компонент Pagination, 
-// який надає користувачеві можливість перемикатися між сторінками колекції. 
-// Реалізуйте компонент Pagination з використанням бібліотеки React Paginate.
+// Критичні проблеми:
 
-// До http-запиту потрібно додати параметри page та perPage. Наприклад:
-// GET https://notehub-public.goit.study/api/notes?page=1&perPage=12
-
-// Додайте умову, щоб компонент Pagination рендерився лише в тому випадку, 
-// якщо кількість сторінок колекції нотатків більше 1.
+// Інтерфейс пропсів має назву PaginateProps, але назва компонента - Pagination. 
+// Інтерфейс повинен мати назву PaginationProps для відповідності вимогам назв.
+// Інструкція імпорту для модуля CSS використовує файл з назвою Paginstion.module.css, 
+// що, ймовірно, є друкарською помилкою і може спричинити помилки імпорту.
 
 
 

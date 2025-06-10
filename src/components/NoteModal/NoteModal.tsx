@@ -8,17 +8,21 @@ interface NoteModalProps {
   onSuccess: () => void;
 }
 
-const modalRoot = document.getElementById('modal-root')!;
-
-export const NoteModal: React.FC<NoteModalProps> = ({ onClose, onSuccess }) => {
+export const NoteModal: React.FC<NoteModalProps> = ({ onClose }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         onClose();
       }
     };
+
+    document.body.style.overflow = 'hidden'; 
+
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
+    };
   }, [onClose]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -30,13 +34,16 @@ export const NoteModal: React.FC<NoteModalProps> = ({ onClose, onSuccess }) => {
   return createPortal(
     <div className={css.backdrop} role="dialog" aria-modal="true" onClick={handleBackdropClick}>
       <div className={css.modal}>
-        <NoteForm onCancel={onClose} onSuccess={onSuccess} />
+        <NoteForm onClose={onClose} />
       </div>
     </div>,
-    modalRoot
+    document.body 
   );
 };
 
-// Модальне вікно має створюватись через createPortal, 
-// щоб рендерити модалку поза межами основного дерева компонентів,
-//  та закриватися при кліку на бекдроп і натисканням на клавішу Escape.
+// Критичні проблеми:
+
+// Модальне вікно рендериться в елемент з id modal-root замість document.body. 
+// Вимога полягає в тому, щоб рендерити безпосередньо у document.body використовуючи createPortal.
+// Відсутня логіка для вимкнення прокручування сторінки, коли модальне вікно відкрите, 
+// і відновлення прокручування, коли модальне вікно закрите.

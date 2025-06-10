@@ -1,11 +1,12 @@
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import css from './NoteForm.module.css';
 import { createNote } from '../../services/noteService';
 
+
 interface NoteFormProps {
-  onCancel: () => void;
-  onSuccess: () => void;
+  onClose: () => void;      
 }
 
 const validationSchema = Yup.object().shape({
@@ -16,23 +17,29 @@ const validationSchema = Yup.object().shape({
     .required('Tag is required'),
 });
 
-export const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSuccess }) => {
+export const NoteForm: React.FC<NoteFormProps> = ({ onClose }) => {
+  const queryClient = useQueryClient();
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: createNote,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['notes'] });
+      onClose(); // Закриваємо після інвалідейту
+    },
+    onError: (error) => {
+      console.error('Note creation failed:', error);
+    },
+  });
+
   return (
     <Formik
       initialValues={{ title: '', content: '', tag: '' }}
       validationSchema={validationSchema}
-      onSubmit={async (values, { setSubmitting }) => {
-        try {
-          await createNote(values);
-          onSuccess();
-        } catch (error) {
-          console.error('Create failed:', error);
-        } finally {
-          setSubmitting(false);
-        }
+      onSubmit={(values) => {
+        mutate(values);
       }}
     >
-      {({ isSubmitting }) => (
+      {() => (
         <Form className={css.form}>
           <div className={css.formGroup}>
             <label htmlFor="title">Title</label>
@@ -60,10 +67,10 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSuccess }) => {
           </div>
 
           <div className={css.actions}>
-            <button type="button" className={css.cancelButton} onClick={onCancel}>
+            <button type="button" className={css.cancelButton} onClick={onClose}>
               Cancel
             </button>
-            <button type="submit" className={css.submitButton} disabled={isSubmitting}>
+            <button type="submit" className={css.submitButton} disabled={isPending}>
               Create note
             </button>
           </div>
@@ -72,20 +79,3 @@ export const NoteForm: React.FC<NoteFormProps> = ({ onCancel, onSuccess }) => {
     </Formik>
   );
 };
-
-// Для керування станом форми, валідації та обробки сабміту слід використовувати бібліотеку Formik.
-
-
-
-// Додай валідацію значень полів форми за допомогою Yup:
-
-// заголовок нотатки має мати мінімальну довжину символів 3, максимальну – 50 
-// та бути обовязковим полем;
-// контент нотатки має мати максимальну довжину символів 500;
-// тег нотатки має бути одним із таких значень: Todo, Work, Personal, Meeting, Shopping, 
-// і є обов’язковим полем.
-
-// Видалення нотатки
-
-// При натисканні на кнопку Delete в елементі списку нотатків, 
-// відповідна нотатка має видалятися на бекенді та оновлюватись збережені серверні дані.
